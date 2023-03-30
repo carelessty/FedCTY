@@ -121,6 +121,7 @@ def get_acc_loss(data_x, data_y, model, dataset_name, w_decay = None):
     model.eval(); model = model.to(device)
     with torch.no_grad():
         tst_gen_iter = tst_gen.__iter__()
+        print(tst_gen_iter)
         for i in range(int(np.ceil(n_tst/batch_size))):
             batch_x, batch_y = tst_gen_iter.__next__()
             batch_x = batch_x.to(device)
