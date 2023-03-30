@@ -110,7 +110,7 @@ def train(args):
 
     # wandb.init(project="FedDC", name='temp')
     np.random.seed(0)
-    wandb.init(project="FedDC_test2", name=str(np.random.randint(100)))
+    #wandb.init(project="FedDC_test2", name=str(np.random.randint(100)))
     for i in range(args.max_communication_rounds):
                 if os.path.exists('%sModel/%s/ins_avg_%dcom.pt'
                                 % (args.data_path, args.dataset, i+1)):
@@ -306,7 +306,7 @@ def train(args):
                 %(i+1, acc_tst, loss_tst))
             tst_cur_cld_perf[i] = [loss_tst, acc_tst]
             
-
+            '''
             # add to wandb
             wandb.log({
                 'Loss/train': {
@@ -335,7 +335,7 @@ def train(args):
                     'Current cloud': tst_cur_cld_perf[i][1]
                 }
             }, step=i)
-
+            '''
             
             if ((i+1) % save_period == 0):
                 torch.save(avg_model_sel.state_dict(), '%sModel/%s/%s/ins_avg_%dcom.pt' 
@@ -379,9 +379,8 @@ def train(args):
                 avg_all_mdls[i//save_period] = all_model
                 avg_cld_mdls[i//save_period] = cur_cld_model
         
-        wandb.finish()            
+        #wandb.finish()            
     return avg_ins_mdls, avg_cld_mdls, avg_all_mdls, trn_sel_clt_perf, tst_sel_clt_perf, trn_cur_cld_perf, tst_cur_cld_perf, trn_all_clt_perf, tst_all_clt_perf
-
 
 
 
