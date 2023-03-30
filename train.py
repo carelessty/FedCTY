@@ -5,6 +5,8 @@ from methods import *
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["WANDB_API_KEY"] = "23f1b0269b48558f206c5613c8acb20c930f1788"
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 epoch = 5
 alpha_coef = 1e-2
