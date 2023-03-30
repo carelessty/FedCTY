@@ -12,7 +12,6 @@ epoch = 5
 alpha_coef = 1e-2
 learning_rate = 0.1
 print_per = epoch // 2
-
 com_amount = 100
 save_period = 50
 weight_decay = 1e-3
@@ -76,7 +75,6 @@ def train(args):
     weight_list = weight_list / np.sum(weight_list) * n_clnt
     if (not os.path.exists('%sModel/%s' % (args.data_path, args.dataset))):
         os.mkdir('%sModel/%s' % (args.data_path, args.dataset))
-    save_period = 100
     n_data_per_client = np.concatenate(clnt_x, axis=0).shape[0] / n_clnt
     n_iter_per_epoch  = np.ceil(n_data_per_client/batch_size)
     n_minibatch = (epoch*n_iter_per_epoch).astype(np.int64)
