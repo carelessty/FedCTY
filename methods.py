@@ -117,11 +117,12 @@ def get_acc_loss(data_x, data_y, model, dataset_name, w_decay = None):
     batch_size = min(2000, data_x.shape[0])
     n_tst = data_x.shape[0]
     #tst_gen = data.DataLoader(CIFARDataset('./data/cifar10_test_100.pkl', None), batch_size=batch_size, shuffle=False)
-    tst_gen = get_dataloaders('cifar10', batch_size=500, shuffle=False)
+    train_gen,tst_gen = get_dataloaders('cifar10', batch_size=500, shuffle=False)
+    
     model.eval(); model = model.to(device)
     with torch.no_grad():
         tst_gen_iter = tst_gen.__iter__()
-        print(tst_gen_iter.__next__())
+        #print(tst_gen_iter.__next__())
         for i in range(int(np.ceil(n_tst/batch_size))):
             batch_x, batch_y = tst_gen_iter.__next__()
             batch_x = batch_x.to(device)
