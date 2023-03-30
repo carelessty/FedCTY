@@ -140,9 +140,14 @@ class CIFARDataset(Dataset):
 
         dataset = pickle.load(open(file_path, "rb"))
 
-        self.X = dataset[0][k]
-        yt = np.array(dataset[1][k])
-        self.y = torch.from_numpy(yt).type(torch.long)
+        if k is None:
+            self.X = np.concatenate(dataset[0])
+            yt = np.concatenate(dataset[1])
+            self.y = torch.from_numpy(yt).type(torch.long)
+        else:
+            self.X = dataset[0][k]
+            yt = np.array(dataset[1][k])
+            self.y = torch.from_numpy(yt).type(torch.long)
 
     def __len__(self):
         return len(self.X)
@@ -223,12 +228,14 @@ def get_dataloaders(dataset, batch_size: int, shuffle=True):
             for ds in CIFAR10_test_split
         ]
 
-    elif dataset[:5] == "CIFAR":
+    elif dataset[:5] == "CIFAR" or dataset[:5] == "cifar":
 
         n_classes = 10          # 类别
         n_clients = 100         # client个数
-        balanced = dataset[8:12] == "bbal"      # 数据分布是否均衡
-        alpha = float(dataset[13:])             # 迪利克雷分布alpha参数，越小越不均匀
+        #balanced = dataset[8:12] == "bbal"      # 数据分布是否均衡
+        balanced = "bbal"
+        alpha = 0.01
+        #alpha = float(dataset[13:])             # 迪利克雷分布alpha参数，越小越不均匀
 
         file_name_train = f"{dataset}_train_{n_clients}.pkl"
         path_train = folder + file_name_train
@@ -249,7 +256,7 @@ def get_dataloaders(dataset, batch_size: int, shuffle=True):
         list_dls_test = clients_set_CIFAR(
             path_test, n_clients, batch_size, True
         )
-        clients_shannon = pickle.load(open(path_train, "rb"))[2]
+        #clients_shannon = pickle.load(open(path_train, "rb"))[2]
         print(f"CIFAR10_nonIID数据集加载成功！")
 
     else:
