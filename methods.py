@@ -110,36 +110,48 @@ def set_client_from_params(mdl, params):
     return mdl
 
 
+class Dataset(torch.utils.data.Dataset):
+    
+    def __init__(self, data_x, data_y=True, train=False, dataset_name=''):
+        self.name = dataset_name
+        if self.name == 'CIFAR10' or self.name == 'CIFAR100':
+            self.train = train
+            self.transform = transforms.Compose([transforms.ToTensor()])
+        
+            self.X_data = data_x
+            self.y_data = data_y
+            if not isinstance(data_y, bool):
+                self.y_data = data_y.astype('float32')
+           
+    def __len__(self):
+        return len(self.X_data)
+
+    def __getitem__(self, idx):    
+        if self.name == 'CIFAR10' or self.name == 'CIFAR100':
+            img = self.X_data[idx]
+            img = np.moveaxis(img, 0, -1)
+            img = self.transform(img)
+            if isinstance(self.y_data, bool):
+                return img
+            else:
+                y = self.y_data[idx]
+                return img, y
+            
+
 def get_acc_loss(data_x, data_y, model, dataset_name, w_decay = None):
     acc_overall = 0; loss_overall = 0;
     loss_fn = torch.nn.CrossEntropyLoss(reduction='sum')
     
     batch_size = min(2000, data_x.shape[0])
     n_tst = data_x.shape[0]
-    #tst_gen = data.DataLoader(CIFARDataset('./data/cifar10_test_100.pkl', None), batch_size=batch_size, shuffle=False)
-    train_gen,tst_gen = get_dataloaders('cifar10', batch_size=500, shuffle=False)
-    test_x = []
-    test_y = []
-    for dl_test in tst_gen:
-        x, y = zip(*[batch for batch in dl_test])
-        test_x.append(torch.cat(x, dim=0))
-        test_y.append(torch.cat(y, dim=0))
-
-    test_x = torch.cat(test_x, dim=0)
-    test_y = torch.cat(test_y, dim=0)
-
-    
+    tst_gen = data.DataLoader(Dataset(data_x, data_y, dataset_name=dataset_name), batch_size=batch_size, shuffle=False)
     model.eval(); model = model.to(device)
     with torch.no_grad():
         tst_gen_iter = tst_gen.__iter__()
-        #print(tst_gen_iter.__next__())
         for i in range(int(np.ceil(n_tst/batch_size))):
-            #batch_x, batch_y = tst_gen_iter.__next__()
-            #batch_x = batch_x.to(device)
-            #batch_y = batch_y.to(device)
-            batch_x = test_x[i*batch_size:(i+1)*batch_size]
-            batch_y = test_y[i*batch_size:(i+1)*batch_size]
-            model = model.to(device)
+            batch_x, batch_y = tst_gen_iter.__next__()
+            batch_x = batch_x.to(device)
+            batch_y = batch_y.to(device)
             y_pred = model(batch_x)
             
             loss = loss_fn(y_pred, batch_y.reshape(-1).long())
