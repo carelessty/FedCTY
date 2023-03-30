@@ -260,7 +260,6 @@ def train(args):
             cent_x = np.concatenate(clnt_x, axis=0)
             cent_y = np.concatenate(clnt_y, axis=0)
 
-
             loss_tst, acc_tst = get_acc_loss(cent_x, cent_y, 
                                             avg_model_sel, args.dataset, 0)
             print("**** Cur Sel Communication %3d, Cent Accuracy: %.4f, Loss: %.4f" 
