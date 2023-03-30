@@ -118,15 +118,27 @@ def get_acc_loss(data_x, data_y, model, dataset_name, w_decay = None):
     n_tst = data_x.shape[0]
     #tst_gen = data.DataLoader(CIFARDataset('./data/cifar10_test_100.pkl', None), batch_size=batch_size, shuffle=False)
     train_gen,tst_gen = get_dataloaders('cifar10', batch_size=500, shuffle=False)
+    test_x = []
+    test_y = []
+    for dl_test in tst_gen:
+        x, y = zip(*[batch for batch in dl_test])
+        test_x.append(torch.cat(x, dim=0))
+        test_y.append(torch.cat(y, dim=0))
+
+    test_x = torch.cat(test_x, dim=0)
+    test_y = torch.cat(test_y, dim=0)
+
     
     model.eval(); model = model.to(device)
     with torch.no_grad():
         tst_gen_iter = tst_gen.__iter__()
         #print(tst_gen_iter.__next__())
         for i in range(int(np.ceil(n_tst/batch_size))):
-            batch_x, batch_y = tst_gen_iter.__next__()
-            batch_x = batch_x.to(device)
-            batch_y = batch_y.to(device)
+            #batch_x, batch_y = tst_gen_iter.__next__()
+            #batch_x = batch_x.to(device)
+            #batch_y = batch_y.to(device)
+            batch_x = test_x[i*batch_size:(i+1)*batch_size]
+            batch_y = test_y[i*batch_size:(i+1)*batch_size]
             y_pred = model(batch_x)
             
             loss = loss_fn(y_pred, batch_y.reshape(-1).long())
