@@ -142,7 +142,7 @@ class CIFARDataset(Dataset):
 
         if k is None:
             self.X = dataset[0][1]
-            yt = np.array(dataset[1][k])
+            yt = np.array(dataset[1][1])
             self.y = torch.from_numpy(yt).type(torch.long)
         else:
             self.X = dataset[0][k]
