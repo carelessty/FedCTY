@@ -139,8 +139,7 @@ def get_acc_loss(data_x, data_y, model, dataset_name, w_decay = None):
             #batch_y = batch_y.to(device)
             batch_x = test_x[i*batch_size:(i+1)*batch_size]
             batch_y = test_y[i*batch_size:(i+1)*batch_size]
-            print (batch_x)
-            print (batch_y)
+            model = model.to(device)
             y_pred = model(batch_x)
             
             loss = loss_fn(y_pred, batch_y.reshape(-1).long())
