@@ -110,41 +110,13 @@ def set_client_from_params(mdl, params):
     return mdl
 
 
-class Dataset(torch.utils.data.Dataset):
-    
-    def __init__(self, data_x, data_y=True, train=False, dataset_name=''):
-        self.name = dataset_name
-        if self.name == 'CIFAR10' or self.name == 'CIFAR100':
-            self.train = train
-            self.transform = transforms.Compose([transforms.ToTensor()])
-        
-            self.X_data = data_x
-            self.y_data = data_y
-            if not isinstance(data_y, bool):
-                self.y_data = data_y.astype('float32')
-           
-    def __len__(self):
-        return len(self.X_data)
-
-    def __getitem__(self, idx):    
-        if self.name == 'CIFAR10' or self.name == 'CIFAR100':
-            img = self.X_data[idx]
-            img = np.moveaxis(img, 0, -1)
-            img = self.transform(img)
-            if isinstance(self.y_data, bool):
-                return img
-            else:
-                y = self.y_data[idx]
-                return img, y
-            
-
 def get_acc_loss(data_x, data_y, model, dataset_name, w_decay = None):
     acc_overall = 0; loss_overall = 0;
     loss_fn = torch.nn.CrossEntropyLoss(reduction='sum')
     
     batch_size = min(2000, data_x.shape[0])
     n_tst = data_x.shape[0]
-    tst_gen = data.DataLoader(Dataset(data_x, data_y, dataset_name=dataset_name), batch_size=batch_size, shuffle=False)
+    tst_gen = data.DataLoader(CIFARDataset('./data/cifar10_test_100.pkl', None), batch_size=batch_size, shuffle=False)
     model.eval(); model = model.to(device)
     with torch.no_grad():
         tst_gen_iter = tst_gen.__iter__()
