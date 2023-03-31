@@ -24,12 +24,7 @@ def train(args):
     """ Train the model """
     os.makedirs(args.output_dir, exist_ok=True)
 
-    
-
     # Prepare dataset
-    # Prepare dataloader
-    train_loader, test_loader = get_dataloaders(
-        dataset=args.dataset, batch_size=args.batch_size, shuffle=True)
 
     # Prepare model
     model_func = lambda: client_model(args.model_name)
@@ -48,6 +43,10 @@ def train(args):
             '%sModel/%s_init_mdl.pt' % (args.data_path, args.model_name)))
 
     n_clnt = args.num_local_clients
+
+    # Prepare dataloader
+    train_loader, test_loader = get_dataloaders(
+        dataset=args.dataset, batch_size=args.batch_size, shuffle=True)
 
     # 获取每个客户端的数据和标签
     clnt_x = []
