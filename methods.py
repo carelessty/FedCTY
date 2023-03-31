@@ -109,40 +109,49 @@ def set_client_from_params(mdl, params):
     mdl.load_state_dict(dict_param)    
     return mdl
 
+def get_acc_loss(data_x_path, data_y_path, model, dataset_name, w_decay=None):
+    acc_overall = 0
+    loss_overall = 0
+    loss_fn = torch.nn.CrossEntropyLoss(reduction="sum")
 
-def get_acc_loss(data_x, data_y, model, dataset_name, w_decay = None):
-    acc_overall = 0; loss_overall = 0;
-    loss_fn = torch.nn.CrossEntropyLoss(reduction='sum')
-    
-    batch_size = min(2000, data_x.shape[0])
-    n_tst = data_x.shape[0]
-    tst_gen = data.DataLoader(CIFARDataset('./data/cifar10_test_100.pkl', None), batch_size=batch_size, shuffle=False)
-    model.eval(); model = model.to(device)
+    batch_size = min(2000, len(data_x_path))
+    list_dls_train, list_dls_test = get_dataloaders(dataset_name, batch_size)
+
+    # Get the right dataset
+    if "train" in data_x_path:
+        dl_idx = int(data_x_path.split("/")[-1].split("_")[0])
+        dataloader = list_dls_train[dl_idx]
+    elif "test" in data_x_path:
+        dl_idx = int(data_x_path.split("/")[-1].split("_")[0])
+        dataloader = list_dls_test[dl_idx]
+    else:
+        raise ValueError("Data path is incorrect")
+
+    n_tst = len(dataloader.dataset)
+    model.eval()
+    model = model.to(device)
     with torch.no_grad():
-        tst_gen_iter = tst_gen.__iter__()
-        for i in range(int(np.ceil(n_tst/batch_size))):
-            batch_x, batch_y = tst_gen_iter.__next__()
+        for batch_x, batch_y in dataloader:
             batch_x = batch_x.to(device)
             batch_y = batch_y.to(device)
             y_pred = model(batch_x)
-            
-            loss = loss_fn(y_pred, batch_y.reshape(-1).long())
+
+            loss = loss_fn(y_pred, batch_y)
 
             loss_overall += loss.item()
 
             # Accuracy calculation
-            y_pred = y_pred.cpu().numpy()            
-            y_pred = np.argmax(y_pred, axis=1).reshape(-1)
-            batch_y = batch_y.cpu().numpy().reshape(-1).astype(np.int32)
+            y_pred = y_pred.cpu().numpy()
+            y_pred = np.argmax(y_pred, axis=1)
+            batch_y = batch_y.cpu().numpy()
             batch_correct = np.sum(y_pred == batch_y)
             acc_overall += batch_correct
-    
-    
+
     loss_overall /= n_tst
-    if w_decay != None:
+    if w_decay is not None:
         # Add L2 loss
         params = get_mdl_params([model], n_par=None)
-        loss_overall += w_decay/2 * np.sum(params * params)
-        
+        loss_overall += w_decay / 2 * np.sum(params * params)
+
     model.train()
     return loss_overall, acc_overall / n_tst
